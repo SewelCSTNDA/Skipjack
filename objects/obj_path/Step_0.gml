@@ -112,6 +112,7 @@ if (keyboard_check_pressed(vk_enter)) {
         }
         instance_destroy();
         show_debug_message("PATH SUCCESS! Key: " + string(the_key));
+		show_debug_message("PATH: Calling obj_battle event_user(0)");
     } else {
         // Reset on failure
         path_nodes = [];
