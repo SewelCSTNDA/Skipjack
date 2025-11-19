@@ -1,69 +1,71 @@
 draw_set_font(fnt_default);
 draw_set_color(c_white);
 
-// Different titles based on cipher mode
+// RESET TO DEFAULT
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+
+var gui_width = display_get_gui_width();
+var gui_height = display_get_gui_height();
+
+var center_x = gui_width / 2;
+var center_y = gui_height / 2;
+
+// Title
+draw_set_halign(fa_center);
 var mode = "first";
 if (variable_instance_exists(obj_battle, "cipher_mode")) {
     mode = obj_battle.cipher_mode;
 }
 
 if (mode == "first") {
-    draw_text(50, 30, "DECRYPT TO DISABLE SHIELD");
-    draw_text(50, 50, "=== KEY: " + string(key) + " ===");
-    draw_text(50, 70, "Encrypted Shield Command: " + encrypted);
-    draw_text(50, 90, "Decrypt to lower enemy shields");
+    draw_text(center_x, 50, "DECRYPT TO DISABLE SHIELD");
+    draw_text(center_x, 80, "KEY: " + string(key));
 } else {
-    draw_text(50, 30, "UNCORRUPT THE PACKET");
-    draw_text(50, 50, "=== KEY: " + string(key) + " ===");
-    draw_text(50, 70, "Corrupted Packet Data: " + encrypted);
-    draw_text(50, 90, "Decrypt to throw back at enemy!");
+    draw_text(center_x, 50, "UNCORRUPT THE PACKET");
+    draw_text(center_x, 80, "KEY: " + string(key));
 }
+draw_text(center_x, 110, "Encrypted: " + encrypted);
+draw_set_halign(fa_left);
 
-draw_text(50, 110, "Use ARROWS to navigate and change letters");
-draw_text(50, 130, "Press ENTER to submit");
-
-// Draw the 4 slots using your assets
-var start_x = 200;
-var start_y = 150;
+// SLOTS - FOR MIDDLE CENTRE ORIGIN SPRITES
 var slot_width = 48;
 var slot_height = 48;
+var total_slots_width = (slot_width * 4) + (20 * 3);
+var slots_start_x = center_x - (total_slots_width / 2) + (slot_width / 2); // Account for centre origin
+var slots_y = center_y;
 
 for (var i = 0; i < letters_len; i++) {
-    var center_x = start_x + (i * (slot_width + 30));
-    var center_y = start_y;
+    var slot_center_x = slots_start_x + (i * (slot_width + 20));
+    var slot_center_y = slots_y;
     
-    // Draw slot background (use active sprite if current slot)
+    // Draw slot at center position (sprite will center itself)
     if (i == current_slot) {
-        draw_sprite(spr_slot_active, 0, center_x, center_y);
+        draw_sprite(spr_slot_active, 0, slot_center_x, slot_center_y);
     } else {
-        draw_sprite(spr_slot, 0, center_x, center_y);
+        draw_sprite(spr_slot, 0, slot_center_x, slot_center_y);
     }
     
-    // Letter inside slot - CENTERED TEXT
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
-    
+    // LETTER - Draw at the same center position as the sprite
     if (player_input[i] != "") {
-        draw_text(center_x, center_y, player_input[i]);
+        // Use center alignment for text
+        draw_set_halign(fa_center);
+        draw_set_valign(fa_middle);
+        draw_text(slot_center_x, slot_center_y, player_input[i]);
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
     } else {
         draw_set_color(c_gray);
-        draw_text(center_x, center_y, "?");
+        draw_set_halign(fa_center);
+        draw_set_valign(fa_middle);
+        draw_text(slot_center_x, slot_center_y, "?");
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
         draw_set_color(c_white);
     }
-    
-    // Reset alignment for other text
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
-    
-    // Slot number below
-    draw_text(center_x - 5, center_y + slot_height/2 + 10, string(i + 1));
 }
 
-// Different text based on mode
-if (mode == "first") {
-    draw_text(start_x - 100, start_y - 60, "Shield Command: " + encrypted);
-} else {
-    draw_text(start_x - 100, start_y - 60, "Packet Data: " + encrypted);
-}
-
-draw_text(50, 250, "LEFT/RIGHT: Select slot | UP/DOWN: Change letter | ENTER: Submit");
+// Instructions
+draw_set_halign(fa_center);
+draw_text(center_x, gui_height - 30, "ARROWS: Move/Change | ENTER: Submit");
+draw_set_halign(fa_left);

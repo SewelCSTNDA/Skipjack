@@ -1,22 +1,28 @@
-// obj_path Draw GUI Event - FIXED CURSOR COLOR
 draw_set_font(fnt_default);
 draw_set_color(c_white);
 
-// Instructions
-draw_text(20, 20, "PATHFINDING: No backtracking! Once you visit a cell, you can't return");
-draw_text(20, 40, "BACKSPACE: undo last step, DELETE: clear all, ENTER: submit");
+var gui_width = display_get_gui_width();
+var gui_height = display_get_gui_height();
 
-// Draw grid background and obstacles
+// Instructions at top
+draw_set_halign(fa_center);
+draw_text(gui_width / 2, 20, "PATHFINDING: Use ARROWS to draw path automatically");
+draw_text(gui_width / 2, 45, "BACKSPACE: undo, DELETE: clear, ENTER: submit");
+draw_set_halign(fa_left);
+
+// Grid position - SIMPLE CENTERING
+origin_x = gui_width / 2 - (grid_w * cell) / 2;
+origin_y = gui_height / 2 - (grid_h * cell) / 2;
+
+// Draw grid (your existing code)
 for (var gx = 0; gx < grid_w; gx++) {
     for (var gy = 0; gy < grid_h; gy++) {
         var draw_x = origin_x + gx * cell;
         var draw_y = origin_y + gy * cell;
         
-        // Draw grid cell background
         draw_set_color(c_white);
         draw_rectangle(draw_x, draw_y, draw_x + cell, draw_y + cell, false);
         
-        // Check if this cell is an obstacle
         var is_obstacle = false;
         for (var i = 0; i < array_length(obstacles); i++) {
             var obs = obstacles[i];
@@ -52,11 +58,11 @@ for (var i = 0; i < array_length(path_nodes); i++) {
     draw_sprite(spr_path, 0, node_draw_x, node_draw_y);
 }
 
-// Draw cursor (flashing effect) - FIXED COLOR
-if (current_time mod 1000 < 500) { // Blink every second
+// Cursor
+if (current_time mod 1000 < 500) {
     var cursor_draw_x = origin_x + cursor_x * cell + cell/2;
     var cursor_draw_y = origin_y + cursor_y * cell + cell/2;
-    draw_set_color(c_blue); // Use c_blue instead of c_cyan
+    draw_set_color(c_blue);
     draw_rectangle(cursor_draw_x - 12, cursor_draw_y - 12, cursor_draw_x + 12, cursor_draw_y + 12, false);
 }
 

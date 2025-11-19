@@ -1,80 +1,96 @@
 draw_set_font(fnt_default);
 draw_set_color(c_white);
 
-// Title and instructions
-draw_text(50, 30, "QUICK TIME EVENT - CATCH THE CORRUPTED PACKET!");
-draw_text(50, 50, "Repeat the arrow pattern before time runs out!");
+// RESET TO DEFAULT
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
 
-// Draw timer bar
-var timer_width = 300;
+var gui_width = display_get_gui_width();
+var gui_height = display_get_gui_height();
+
+var center_x = gui_width / 2;
+var center_y = gui_height / 2;
+
+// Title
+draw_set_halign(fa_center);
+draw_text(center_x, 50, "QUICK TIME EVENT - CATCH THE PACKET!");
+draw_text(center_x, 80, "Repeat the pattern before time runs out!");
+draw_set_halign(fa_left);
+
+// Timer bar
+var timer_width = 400;
+var timer_x = center_x - (timer_width / 2);
+var timer_y = 120;
+
 var timer_percent = timer / (room_speed * 4);
-var timer_x = 50;
-var timer_y = 80;
 
 // Timer background
 draw_set_color(c_gray);
 draw_rectangle(timer_x, timer_y, timer_x + timer_width, timer_y + 20, true);
 
-// Timer fill (changes color based on time)
-if (timer_percent > 0.5) {
-    draw_set_color(c_green);
-} else if (timer_percent > 0.25) {
-    draw_set_color(c_yellow);
-} else {
-    draw_set_color(c_red);
-}
+// Timer fill
+if (timer_percent > 0.5) draw_set_color(c_green);
+else if (timer_percent > 0.25) draw_set_color(c_yellow);
+else draw_set_color(c_red);
+
 draw_rectangle(timer_x, timer_y, timer_x + timer_width * timer_percent, timer_y + 20, true);
 
-// Timer outline and text
+// Timer outline
 draw_set_color(c_white);
 draw_rectangle(timer_x, timer_y, timer_x + timer_width, timer_y + 20, false);
 draw_text(timer_x + timer_width + 10, timer_y, string(ceil(timer / room_speed)) + "s");
 
-// Draw pattern sequence USING YOUR ARROW ASSETS
-var pattern_start_x = 200;
-var pattern_y = 150;
-var arrow_spacing = 80; // Increased spacing for sprites
+// ARROWS - REVEAL ONE AT A TIME
+var total_arrows_width = (60 * array_length(pattern)) + (20 * (array_length(pattern) - 1));
+var arrows_start_x = center_x - (total_arrows_width / 2);
+var arrows_y = center_y - 30;
 
-draw_text(pattern_start_x - 100, pattern_y - 30, "Pattern to input:");
+draw_set_halign(fa_center);
+draw_text(center_x, arrows_y - 40, "Pattern to input:");
+draw_set_halign(fa_left);
 
 for (var i = 0; i < array_length(pattern); i++) {
-    var arrow_x = pattern_start_x + (i * arrow_spacing);
-    var arrow_y = pattern_y;
+    var arrow_x = arrows_start_x + (i * 80);
+    var arrow_y = arrows_y;
     
-    // Determine which arrow sprite to use
-    var arrow_sprite = -1;
-    if (pattern[i] == vk_up) arrow_sprite = spr_arrow_up;
-    else if (pattern[i] == vk_down) arrow_sprite = spr_arrow_down;
-    else if (pattern[i] == vk_left) arrow_sprite = spr_arrow_left;
-    else if (pattern[i] == vk_right) arrow_sprite = spr_arrow_right;
-    
-    // Draw arrow background (green for completed, highlighted for current, normal for upcoming)
-    if (i < index) {
-        // Completed steps - green background
-        draw_set_color(c_green);
-        draw_rectangle(arrow_x - 25, arrow_y - 25, arrow_x + 25, arrow_y + 25, true);
-        // Draw arrow sprite
-        draw_sprite(arrow_sprite, 0, arrow_x, arrow_y);
-    } else if (i == index) {
-        // Current step - pulsating yellow background
-        var pulse = abs(sin(current_time / 200)) * 0.5 + 0.5; // Pulsing effect
-        draw_set_color(merge_color(c_yellow, c_white, pulse));
-        draw_rectangle(arrow_x - 25, arrow_y - 25, arrow_x + 25, arrow_y + 25, true);
-        // Draw arrow sprite
-        draw_sprite(arrow_sprite, 0, arrow_x, arrow_y);
+    // Only show arrows up to the current index + 1
+    if (i <= index) {
+        // Determine arrow sprite
+        var arrow_sprite = -1;
+        if (pattern[i] == vk_up) arrow_sprite = spr_arrow_up;
+        else if (pattern[i] == vk_down) arrow_sprite = spr_arrow_down;
+        else if (pattern[i] == vk_left) arrow_sprite = spr_arrow_left;
+        else if (pattern[i] == vk_right) arrow_sprite = spr_arrow_right;
+        
+        // Draw background
+        if (i < index) {
+            draw_set_color(c_green); // Completed - green
+            draw_rectangle(arrow_x - 25, arrow_y - 25, arrow_x + 25, arrow_y + 25, true);
+        } else if (i == index) {
+            draw_set_color(c_yellow); // Current - yellow
+            draw_rectangle(arrow_x - 25, arrow_y - 25, arrow_x + 25, arrow_y + 25, true);
+        } else {
+            draw_set_color(c_white); // Next - white outline
+            draw_rectangle(arrow_x - 25, arrow_y - 25, arrow_x + 25, arrow_y + 25, false);
+        }
+        
+        // DRAW THE ARROW SPRITE
+        if (arrow_sprite != -1) {
+            draw_sprite(arrow_sprite, 0, arrow_x, arrow_y);
+        }
+        
+        draw_set_color(c_white);
     } else {
-        // Upcoming steps - just the arrow sprite
-        draw_sprite(arrow_sprite, 0, arrow_x, arrow_y);
-        // Optional: dim upcoming arrows
-        draw_set_color(make_color_rgb(150, 150, 150));
+        // Future arrows - show as "?" or hidden
+        draw_set_color(c_gray);
         draw_rectangle(arrow_x - 25, arrow_y - 25, arrow_x + 25, arrow_y + 25, false);
+        draw_text(arrow_x - 4, arrow_y - 8, "?");
+        draw_set_color(c_white);
     }
-    
-    draw_set_color(c_white);
 }
 
-// Progress indicator
-draw_text(50, 200, "Progress: " + string(index) + "/" + string(pattern_length));
-
-// Instructions
-draw_text(50, 230, "Press the arrows in the exact sequence shown above!");
+// Progress
+draw_set_halign(fa_center);
+draw_text(center_x, arrows_y + 60, "Progress: " + string(index) + "/" + string(pattern_length));
+draw_text(center_x, gui_height - 30, "Press arrows in the exact sequence!");
+draw_set_halign(fa_left);

@@ -1,5 +1,7 @@
 // User Event 1 - Cipher completed (handles BOTH shield and packet)
 show_debug_message("BATTLE: Cipher solved!");
+show_debug_message("=== BATTLE: Cipher User Event 1 triggered ===");
+show_debug_message("=== cipher_mode = " + string(cipher_mode) + " ===");
 
 if (cipher_mode == "first") {
     // First use: Disable shield
